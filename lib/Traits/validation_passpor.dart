@@ -10,7 +10,7 @@ Future<Map> ValidationPassport({String page, String token}) async {
 
   // print('input api validation-passport token :${token}');
   final response_validation_passport = await http.post(
-    '${global.url}/api/validation-passport',
+    '${global.url}:${global.port}/api/validation-passport',
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../global/global.dart' as global;
 
-sidebar(context, List<dynamic> menu_name_arrs, List<dynamic> menu_id_arrs) {
+sidebar(context, List<dynamic> menu_name_arrs, List<dynamic> menu_id_arrs,
+    FadeInImage company_fadeIn_image) {
   var indexs = [
     3,
     2,
@@ -14,7 +15,7 @@ sidebar(context, List<dynamic> menu_name_arrs, List<dynamic> menu_id_arrs) {
       padding: EdgeInsets.zero,
       children: <Widget>[
         DrawerHeader(
-          child: Image.network('${global.url}/api/image/app/stock.jpg'),
+          child: company_fadeIn_image,
           decoration: BoxDecoration(
             color: Theme.of(context).primaryColor,
           ),

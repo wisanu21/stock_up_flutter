@@ -21,6 +21,8 @@ class dashboardState extends State<dashboard> {
   var menu_name_arr;
   var menu_id_arr;
   Widget sidebar_w;
+  var company_fadeIn_image;
+  var employee_fadeIn_image;
 
   void initState() {
     super.initState();
@@ -30,7 +32,7 @@ class dashboardState extends State<dashboard> {
   loadData() async {
     final response = await http.post(
       // '${globadata_dashboardl.url}/api/get-company-by-employee-id',
-      '${global.url}/api/get-data-dashboard',
+      '${global.url}:${global.port}/api/get-data-dashboard',
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -42,17 +44,31 @@ class dashboardState extends State<dashboard> {
     // print('object');
     final response_data_dashboard = jsonDecode(response.body);
     final load_data_company_image = null;
-
     setState(() {
-      sidebar_w = sidebar.sidebar(
-          context,
-          response_data_dashboard["arr_name_menu"],
-          response_data_dashboard["arr_id_menu"]);
       company_image = load_data_company_image;
       full_name =
           '${response_data_dashboard['employees_first_name']} ${response_data_dashboard['employees_last_name']}';
       level = '${response_data_dashboard["levels_name"]}';
-      print(response_data_dashboard);
+      String companies_path_image =
+          '${response_data_dashboard["companies_path_image"]}';
+      String employee_path_image =
+          '${response_data_dashboard["employees_path_image"]}';
+      // print(response_data_dashboard);
+      company_fadeIn_image = FadeInImage.assetNetwork(
+        placeholder: 'images/loading.gif',
+        image:
+            '${global.url}:${global.port}/api/image/company/${companies_path_image}',
+      );
+      employee_fadeIn_image = FadeInImage.assetNetwork(
+        placeholder: 'images/loading.gif',
+        image:
+            '${global.url}:${global.port}/api/image/employee/${employee_path_image}',
+      );
+      sidebar_w = sidebar.sidebar(
+          context,
+          response_data_dashboard["arr_name_menu"],
+          response_data_dashboard["arr_id_menu"],
+          company_fadeIn_image);
     });
   }
 
@@ -83,14 +99,8 @@ class dashboardState extends State<dashboard> {
                         Container(
                           height: 300,
                           width: 300,
-                          child: FadeInImage.assetNetwork(
-                            placeholder: 'images/loading.gif',
-                            image: '${global.url}/api/image/company/1.png',
-                          ),
+                          child: employee_fadeIn_image,
                         )
-                        // child: Image.network('${global.url}/storage/company/1.png'),
-                        // child: Image.network(
-                        //     'http://10.0.0.196:8000/storage/company/1.png')),
                       ]),
                 )
               ]),

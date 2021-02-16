@@ -4,11 +4,13 @@ import 'package:flutter_bootstrap/flutter_bootstrap.dart';
 // import 'package:stock_up_flutter/pages/register_select_company.dart';
 import 'package:smart_select/smart_select.dart';
 import 'dart:convert';
+import 'dart:io';
 import 'package:form_validator/form_validator.dart';
 // import '../choices.dart' as choices;
 import '../global/global.dart' as global;
 import '../models/company.dart' as model_company;
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 
 class register extends StatefulWidget {
   @override
@@ -26,6 +28,8 @@ class _registerState extends State<register> {
   // bool validate_text_password = false;
   final text_easy_name = TextEditingController();
   // bool validate_text_easy_name = false;
+  File imageFile;
+
   String select_company = '';
   Key smart_select;
 
@@ -52,8 +56,8 @@ class _registerState extends State<register> {
     //     await store.getFile('${global.url}/api/get-company-by-is-register');
     // http://127.0.0.1:8000/api/get-company
 
-    final response =
-        await http.get('${global.url}/api/get-company-by-is-register');
+    final response = await http
+        .get('${global.url}:${global.port}/api/get-company-by-is-register');
     final jsonString = jsonDecode(response.body);
     // print(fetchAlbum());
     // print(jsonDecode(response.body));
@@ -119,7 +123,7 @@ class _registerState extends State<register> {
                         isTwoLine: true,
                         leading: CircleAvatar(
                           backgroundImage: NetworkImage(
-                              '${global.url}/api/image/app/stock.jpg'),
+                              '${global.url}:${global.port}/api/image/app/stock.jpg'),
                         ),
                       );
                     }),
@@ -219,6 +223,30 @@ class _registerState extends State<register> {
                 ]),
                 BootstrapRow(height: 80.0, children: <BootstrapCol>[
                   BootstrapCol(
+                    sizes: 'col-2',
+                  ),
+                  BootstrapCol(
+                      sizes: 'col-8',
+                      child: FlatButton(
+                        color: Theme.of(context).unselectedWidgetColor,
+                        textColor: Colors.white,
+                        onPressed: () async {
+                          var picture = await ImagePicker.pickImage(
+                              source: ImageSource.gallery);
+                          this.setState(() {
+                            imageFile = picture;
+                          });
+                        },
+                        child: Text(
+                          "อัพโหลดรูป",
+                        ),
+                      )),
+                  BootstrapCol(
+                    sizes: 'col-2',
+                  ),
+                ]),
+                BootstrapRow(height: 80.0, children: <BootstrapCol>[
+                  BootstrapCol(
                     sizes: 'col-12',
                     child: FlatButton(
                       color: Theme.of(context).primaryColor,
@@ -230,44 +258,58 @@ class _registerState extends State<register> {
                             backgroundColor: Colors.red,
                           ));
                         } else {
-                          if (_form.currentState.validate() == true) {
-                            // save
-                            final response = await http.post(
-                              '${global.url}/api/save-register',
-                              headers: <String, String>{
-                                'Content-Type':
-                                    'application/json; charset=UTF-8',
-                              },
-                              body: jsonEncode(<String, String>{
-                                'select_company': select_company,
-                                'text_fname': text_fname.text,
-                                'text_lname': text_lname.text,
-                                'text_phone': text_phone.text,
-                                'text_password': text_password.text,
-                                'text_easy_name': text_easy_name.text
-                              }),
-                            );
+                          print(imageFile);
+                          if (imageFile == null) {
+                            Scaffold.of(context).showSnackBar(SnackBar(
+                              content: Text('กรุณาเลือกรูป'),
+                              backgroundColor: Colors.red,
+                            ));
+                          } else {
+                            if (_form.currentState.validate() == true) {
+                              final bytes_image_file =
+                                  imageFile.readAsBytesSync();
+                              final base64Image =
+                                  base64Encode(bytes_image_file);
+                              // save
+                              final response = await http.post(
+                                '${global.url}:${global.port}/api/save-register',
+                                headers: <String, String>{
+                                  'Content-Type':
+                                      'application/json; charset=UTF-8',
+                                },
+                                body: jsonEncode(<String, String>{
+                                  'select_company': select_company,
+                                  'text_fname': text_fname.text,
+                                  'text_lname': text_lname.text,
+                                  'text_phone': text_phone.text,
+                                  'text_password': text_password.text,
+                                  'text_easy_name': text_easy_name.text,
+                                  'bytes_image_file': base64Image
+                                }),
+                              );
 
-                            Map jsonString = jsonDecode(response.body);
-                            print((jsonString["state"]));
-                            if (jsonString["state"] == 'error') {
-                              if (jsonString["detail"].contains(
-                                  "for key 'employees_mobile_unique'")) {
-                                Scaffold.of(context).showSnackBar(SnackBar(
-                                  content:
-                                      Text('my system is have phone number !'),
-                                  backgroundColor: Colors.red,
-                                ));
-                              } else {
-                                Scaffold.of(context).showSnackBar(SnackBar(
-                                  content: Text('กรุณาตรวจสอบข้อมูล !'),
-                                  backgroundColor: Colors.red,
-                                ));
+                              Map jsonString = jsonDecode(response.body);
+                              print((jsonString["state"]));
+                              if (jsonString["state"] == 'error') {
+                                if (jsonString["detail"].contains(
+                                    "for key 'employees_mobile_unique'")) {
+                                  Scaffold.of(context).showSnackBar(SnackBar(
+                                    content: Text(
+                                        'my system is have phone number !'),
+                                    backgroundColor: Colors.red,
+                                  ));
+                                } else {
+                                  Scaffold.of(context).showSnackBar(SnackBar(
+                                    content: Text('กรุณาตรวจสอบข้อมูล !'),
+                                    backgroundColor: Colors.red,
+                                  ));
+                                }
                               }
-                            }
-                            if (jsonString["state"] == 'successfully') {
-                              String detail_successfully = jsonString["detail"];
-                              Navigator.pop(context, detail_successfully);
+                              if (jsonString["state"] == 'successfully') {
+                                String detail_successfully =
+                                    jsonString["detail"];
+                                Navigator.pop(context, detail_successfully);
+                              }
                             }
                           }
                         }

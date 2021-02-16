@@ -31,7 +31,8 @@ class _HomeState extends State<Home> {
                           width: 300,
                           child: FadeInImage.assetNetwork(
                             placeholder: 'images/loading.gif',
-                            image: '${global.url}/api/image/app/stock.jpg',
+                            image:
+                                '${global.url}:${global.port}/api/image/app/stock.jpg',
                           )),
                       Container(
                         height: 10,
@@ -43,7 +44,7 @@ class _HomeState extends State<Home> {
                           var device_details = await getDeviceDetails();
                           // print(device_details);
                           final response_login_by_device_id = await http.post(
-                            '${global.url}/api/login-by-device-id',
+                            '${global.url}:${global.port}/api/login-by-device-id',
                             headers: <String, String>{
                               'Content-Type': 'application/json; charset=UTF-8',
                             },

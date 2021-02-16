@@ -101,7 +101,7 @@ class _loginState extends State<login> {
                                       var device_details =
                                           await getDeviceDetails();
                                       final login_response = await http.post(
-                                        '${global.url}/api/login',
+                                        '${global.url}:${global.port}/api/login',
                                         headers: <String, String>{
                                           'Content-Type':
                                               'application/json; charset=UTF-8',
@@ -114,7 +114,7 @@ class _loginState extends State<login> {
                                               device_details['identifier']
                                         }),
                                       );
-    
+
                                       Map json_string_login =
                                           jsonDecode(login_response.body);
                                       // print((jsonString.values.toList())[0]);

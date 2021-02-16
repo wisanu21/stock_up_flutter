@@ -21,7 +21,7 @@ LogOutPassport() async {
   var device_details = await getDeviceDetails();
 
   final response_log_out = await http.post(
-    '${global.url}/api/logout',
+    '${global.url}:${global.port}/api/logout',
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
